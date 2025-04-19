@@ -1,7 +1,13 @@
 # Changelog
 
-## [1.1.0] - 2024-03-21
+## [1.2.0] - 2024-03-21
+### Changed
+- Set up GitHub repository at https://github.com/aleyancey/floating-rainbow-orb
+- Implemented Git LFS for handling large audio files
+- Removed large audio file from Git history and added to .gitignore
+- Successfully pushed initial codebase to GitHub
 
+## [1.1.0] - 2024-03-21
 ### Added
 - Created `liquid-metal-iridescent.html` with:
   - Iridescent color shifting effect using custom shader
@@ -13,7 +19,6 @@
   - High-resolution sphere geometry (128x128 segments)
 
 ## [1.0.0] - 2024-03-21
-
 ### Added
 - Initial creation of liquid metal swirl visualization
 - Features in `liquid-metal-swirl.html`:
@@ -25,9 +30,8 @@
   - Detailed code comments for better maintainability
 
 ## [0.1.0] - 2024-03-21
-
 ### Added
 - Initialized Git repository
 - Created project structure
 - Added README.md with project documentation
-- Set up version control tracking 
+- Set up version control tracking
