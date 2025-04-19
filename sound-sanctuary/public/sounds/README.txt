@@ -1,0 +1,11 @@
+Place your 10 MVP natural sound files here. Example filenames:
+- rain.mp3
+- bowl.mp3
+- stream.mp3
+- ocean.mp3
+- ambient.mp3
+- birds.mp3
+- leaves.mp3
+- garden.mp3
+- forest.mp3
+- wind.mp3

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Iridescent Liquid Metal</title>
+    <style>
+        body { 
+            margin: 0; 
+            overflow: hidden; 
+            background-color: #000;
+        }
+        canvas { 
+            display: block; 
+        }
+    </style>
+</head>
+<body>
+<script type="module">
+// Import Three.js
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+
+// Basic scene setup
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x000000);
+
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+camera.position.z = 2.5;
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+// Add lights for better iridescent effect
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+scene.add(ambientLight);
+
+const pointLight = new THREE.PointLight(0xffffff, 1.5);
+pointLight.position.set(5, 5, 5);
+scene.add(pointLight);
+
+// Create sphere geometry
+const geometry = new THREE.SphereGeometry(1, 128, 128);
+
+// Shader uniforms
+const uniforms = {
+    time: { value: 0.0 },
+    mouse: { value: new THREE.Vector2(0.5, 0.5) }
+};
+
+// Create shader material with iridescent effect
+const material = new THREE.ShaderMaterial({
+    uniforms: uniforms,
+    vertexShader: `
+        varying vec3 vNormal;
+        varying vec3 vPosition;
+        varying vec2 vUv;
+        uniform float time;
+
+        void main() {
+            vNormal = normal;
+            vPosition = position;
+            vUv = uv;
+            
+            // Add subtle deformation
+            vec3 pos = position;
+            float freq = 2.0;
+            float amp = 0.05;
+            pos.x += sin(pos.y * freq + time) * amp;
+            pos.y += sin(pos.x * freq + time) * amp;
+            pos.z += sin(pos.x * freq + time) * amp;
+            
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+        }
+    `,
+    fragmentShader: `
+        precision highp float;
+        varying vec3 vNormal;
+        varying vec3 vPosition;
+        varying vec2 vUv;
+        uniform float time;
+        uniform vec2 mouse;
+
+        // Iridescent color function
+        vec3 getIridescentColor(float angle) {
+            // Base colors for iridescent effect
+            vec3 color1 = vec3(0.8, 0.2, 0.4);  // Pink
+            vec3 color2 = vec3(0.2, 0.6, 0.8);  // Blue
+            vec3 color3 = vec3(0.4, 0.8, 0.2);  // Green
+            
+            // Create color shift based on angle
+            float t = sin(angle * 3.0 + time) * 0.5 + 0.5;
+            vec3 color = mix(color1, color2, t);
+            color = mix(color, color3, sin(angle * 2.0 + time * 0.5) * 0.5 + 0.5);
+            
+            return color;
+        }
+
+        void main() {
+            // Calculate view direction and normal
+            vec3 viewDir = normalize(cameraPosition - vPosition);
+            vec3 normal = normalize(vNormal);
+            
+            // Calculate fresnel effect
+            float fresnel = pow(1.0 - max(dot(viewDir, normal), 0.0), 2.0);
+            
+            // Calculate angle for iridescent effect
+            float angle = dot(normal, viewDir) * 2.0 + time * 0.5;
+            
+            // Get base iridescent color
+            vec3 baseColor = getIridescentColor(angle);
+            
+            // Add mouse interaction
+            vec2 mouseOffset = mouse - 0.5;
+            float mouseInfluence = length(mouseOffset);
+            baseColor += vec3(sin(time + mouseInfluence * 10.0) * 0.1);
+            
+            // Combine with fresnel effect
+            vec3 finalColor = mix(baseColor, vec3(1.0), fresnel * 0.5);
+            
+            // Add specular highlight
+            vec3 lightDir = normalize(vec3(1.0, 1.0, 1.0));
+            float specular = pow(max(dot(reflect(-lightDir, normal), viewDir), 0.0), 32.0);
+            finalColor += vec3(specular * 0.5);
+            
+            gl_FragColor = vec4(finalColor, 1.0);
+        }
+    `,
+    side: THREE.DoubleSide
+});
+
+// Create mesh
+const mesh = new THREE.Mesh(geometry, material);
+scene.add(mesh);
+
+// Mouse interaction
+window.addEventListener('mousemove', (event) => {
+    uniforms.mouse.value.x = event.clientX / window.innerWidth;
+    uniforms.mouse.value.y = 1.0 - event.clientY / window.innerHeight;
+});
+
+// Handle window resize
+window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// Animation loop
+function animate() {
+    requestAnimationFrame(animate);
+    uniforms.time.value = performance.now() * 0.001; // Convert to seconds
+    mesh.rotation.y += 0.005;
+    renderer.render(scene, camera);
+}
+
+animate();
+</script>
+</body>
+</html> 

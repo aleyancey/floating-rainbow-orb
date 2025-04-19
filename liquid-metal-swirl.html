@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Three.js Test</title>
+    <style>
+        /* Remove default margins and hide overflow to prevent scrollbars */
+        body { 
+            margin: 0; 
+            overflow: hidden; 
+        }
+        /* Ensure canvas takes full viewport */
+        canvas { 
+            display: block; 
+        }
+    </style>
+</head>
+<body>
+<script type="module">
+// Import Three.js
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+
+// Basic scene setup
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer();
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+// Create a simple red sphere
+const geometry = new THREE.SphereGeometry(1, 32, 32);
+const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+const sphere = new THREE.Mesh(geometry, material);
+scene.add(sphere);
+
+// Position camera
+camera.position.z = 5;
+
+// Add some console logging
+console.log('Three.js version:', THREE.REVISION);
+console.log('WebGL renderer:', renderer.info.render);
+
+// Simple animation loop
+function animate() {
+    requestAnimationFrame(animate);
+    sphere.rotation.x += 0.01;
+    sphere.rotation.y += 0.01;
+    renderer.render(scene, camera);
+}
+
+// Start animation
+animate();
+
+// Handle window resize
+window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+});
+</script>
+</body>
+</html> 
